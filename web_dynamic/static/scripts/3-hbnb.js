@@ -23,9 +23,23 @@ $(document).ready(function () {
     }
   });
 
-  $.post('/api/v1/places_search/', '{}', function (data, textStatus) {
+  $.get('http://0.0.0.0:5001/api/v1/status/', function (data, textStatus) {
     if (textStatus === 'success') {
-      for (const place of data) {
+      if (data.status === 'OK') {
+        $('#api_status').addClass('available');
+      } else {
+        $('#api_status').removeClass('available');
+      }
+    }
+  });
+
+  $.ajax({
+    url: 'http://0.0.0.0:5001/api/v1/places_search/',
+    type: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify({}), // Empty object
+    success: function (response) {
+      for (const place of response) {
         const article = $('<article></article>').addClass('place');
         const titleBox = $('<div></div>').addClass('title_box');
         const title = $('<h2></h2>').text(place.name);
@@ -39,8 +53,11 @@ $(document).ready(function () {
         const description = $('<div></div>').addClass('description').text(place.description);
         article.append(titleBox, information, description);
         $('section.places').append(article);
-        console.log(article)
       }
+      console.log('Success:', response);
+    },
+    error: function (error) {
+      console.error('Error:', error);
     }
   });
 });
